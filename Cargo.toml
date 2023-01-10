@@ -1,0 +1,24 @@
+[package]
+name = "libswupdate"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.62"
+repository = "https://github.com/unfoldedcircle/libswupdate-rs"
+description = "Wrapper for SWUpdate client library"
+authors = ["Markus Zehnder <markus.z@unfoldedcircle.com>"]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["swupdate"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "libswupdate"
+
+[workspace]
+members = ["libswupdate-sys"]
+
+[dependencies]
+libswupdate-sys = { path = "libswupdate-sys", version = "0.1" }
+
+enum_primitive = "0.1"

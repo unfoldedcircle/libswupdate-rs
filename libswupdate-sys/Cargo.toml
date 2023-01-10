@@ -1,0 +1,15 @@
+[package]
+name = "libswupdate-sys"
+version = "0.1.0"
+links = "swupdate"
+build = "build.rs"
+edition = "2021"
+repository = "https://github.com/unfoldedcircle/libswupdate-rs"
+description = "Native bindings to the libswupdate library"
+authors = ["Markus Zehnder <markus.z@unfoldedcircle.com>"]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["swupdate", "ffi"]
+categories = ["external-ffi-bindings"]
+
+[dependencies]
