@@ -21,7 +21,10 @@ At the moment we don't run `bindgen` at build-time, but use pregenerated binding
 
 ```shell
 cargo install bindgen-cli
-bindgen /usr/include/progress_ipc.h -o src/bindings.rs
+bindgen wrapper.h -o src/bindings.rs \
+    --allowlist-function '(^.*ipc.*|^get_.*_socket|^swupdate.*)' \
+    --allowlist-type 'msgtype.*' \
+    --allowlist-var '(IPC_.*|SWUPDATE_.*|CMD_.*|SOCKET_PROGRESS_PATH)'
 ```
 
 ## License
