@@ -896,10 +896,11 @@ extern "C" {
         size: isize,
     ) -> ::std::os::raw::c_int;
 }
+// Manual correction for easier Rust integration: these are const parameters and don't need to be mutable
 extern "C" {
     pub fn swupdate_set_aes(
-        key: *mut ::std::os::raw::c_char,
-        ivt: *mut ::std::os::raw::c_char,
+        key: *const ::std::os::raw::c_char,
+        ivt: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
