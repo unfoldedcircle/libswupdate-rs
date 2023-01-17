@@ -1,3 +1,3 @@
 fn main() {
-  println!("cargo:rustc-link-lib=swupdate");
+    println!("cargo:rustc-link-lib=swupdate");
 }

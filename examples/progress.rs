@@ -2,13 +2,13 @@ use libswupdate::*;
 use std::io;
 
 fn main() -> Result<(), io::Error> {
-    let mut swupdate = SWUpdateProgress::new();
+    let mut progress = SWUpdateProgress::new();
 
-    println!("Connecting to: {}", swupdate.get_prog_socket());
+    println!("Connecting to: {}", progress.get_socket_path());
 
-    swupdate.connect_progress()?;
+    progress.connect()?;
 
     loop {
-        println!("{:?}", swupdate.receive_progress()?);
+        println!("{:?}", progress.receive()?);
     }
 }

@@ -2,7 +2,7 @@
 
 use enum_primitive::*;
 use libswupdate_sys::*;
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::io;
 use std::mem::MaybeUninit;
 use std::os::fd::RawFd;
@@ -93,12 +93,14 @@ impl SWUpdateProgress {
         Self::default()
     }
 
-    pub fn get_prog_socket(&self) -> String {
+    /// Get the SWUpdate progress socket path.
+    pub fn get_socket_path(&self) -> String {
         let test = unsafe { CStr::from_ptr(get_prog_socket()) };
         String::from(test.to_str().unwrap())
     }
 
-    pub fn connect_progress(&mut self) -> Result<(), io::Error> {
+    /// Connect to the default progress interface.
+    pub fn connect(&mut self) -> Result<(), io::Error> {
         let fd = unsafe { progress_ipc_connect(false) };
         if fd == -1 {
             return Err(io::Error::last_os_error());
@@ -107,18 +109,36 @@ impl SWUpdateProgress {
         Ok(())
     }
 
-    pub fn receive_progress(&mut self) -> Result<ProgressMsg, io::Error> {
+    /// Connect to the given progress interface.
+    ///
+    /// In case more as an instance of SWUpdate is running, this allows to select which should be taken.
+    pub fn connect_with_path(&mut self, socket_path: impl AsRef<str>) -> Result<(), io::Error> {
+        let socket_path = CString::new(socket_path.as_ref())
+            .map_err(|_| io::Error::from(io::ErrorKind::InvalidInput))?;
+        let fd = unsafe { progress_ipc_connect_with_path(socket_path.as_ptr(), false) };
+        if fd == -1 {
+            return Err(io::Error::last_os_error());
+        }
+        self.fd = Some(fd);
+        Ok(())
+    }
+
+    /// Retrieve messages from progress interface.
+    ///
+    /// This is a blocking operation.
+    pub fn receive(&mut self) -> Result<ProgressMsg, io::Error> {
         if let Some(fd) = self.fd.as_mut() {
             let mut msg: MaybeUninit<progress_msg> = MaybeUninit::uninit();
 
             let ret = unsafe { progress_ipc_receive(fd, msg.as_mut_ptr()) };
 
             if ret <= 0 {
-                self.fd = None; // closed by library
+                self.fd = None; // already closed by library
                 Err(io::Error::last_os_error())
             } else {
                 let mut msg = unsafe { msg.assume_init() };
-                // The C tool had this comment: "Be sure that string in message are Null terminated". So better be safe....
+                // swupdate-progress.c has this comment: "Be sure that string in message are Null terminated". So better be safe....
+                // Note: len() returns the static array length, not a string length.
                 msg.cur_image[msg.cur_image.len() - 1] = 0;
                 msg.hnd_name[msg.hnd_name.len() - 1] = 0;
                 msg.info[msg.info.len() - 1] = 0;
